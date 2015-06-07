@@ -9,9 +9,9 @@ To provide straigntforward and multifunctional publish / subscribe capabilities 
 
 ### Size
 
-+ Uncompressed: 3.27KB
-+ Minified: 1.23KB
-+ Minified and gzipped: 645B
++ Uncompressed: 3.3KB
++ Minified: 965B
++ Minified and gzipped: 505B
 
 **sup.publish()**
 
