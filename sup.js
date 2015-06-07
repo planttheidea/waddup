@@ -122,7 +122,7 @@
 		return this;
 	}
 	
-	window.Sup = {
+	window.sup = {
 		publish:prv_publish,
 		subscribe:prv_subscribe,
 		unsubscribe:prv_unsubscribe
