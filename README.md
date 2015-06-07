@@ -13,7 +13,7 @@ To provide straigntforward and multifunctional publish / subscribe capabilities 
 + Minified: 1.23KB
 + Minified and gzipped: 645B
 
-**Sup.publish()**
+**sup.publish()**
 
 Publish a topic, usually upon some other event. This topic can be subscribed to by an unlimited number of objects. To execute the method, a single object is passed in with the following components:
 + topic *(string, required)*
@@ -23,7 +23,7 @@ Publish a topic, usually upon some other event. This topic can be subscribed to 
   + Can be any datatype, but defaults to an object
 
 Example:
-```html
+```
 var div = document.getElementById('div');
 
 div.addEventListener('click',function(){
@@ -36,7 +36,7 @@ div.addEventListener('click',function(){
 },false);
 ```
 
-**Sup.subscribe()**
+**sup.subscribe()**
 
 Subscribe to a topic, so that a specific function you pass in will be executed upon each publishing of that topic. To execute the method, a single object is passed in with the following components:
 + topic *(string / array, required)*
@@ -50,8 +50,8 @@ Subscribe to a topic, so that a specific function you pass in will be executed u
   + Function that will be executed upon each publishing of given topic
 
 Example:
-```html
-Sup.subscribe({
+```
+sup.subscribe({
   // topic:'divClick',
   topic:['divClick','divDimensionsResize'],
   name:'getDivId',
@@ -74,8 +74,8 @@ Remove subscription(s) to a topic based on subscription name passed in. To execu
   + Unique name of subscription
 
 Example:
-```html
-Sup.unsubscribe({
+```
+sup.unsubscribe({
   //name:'getDivId'
   name:['getDivId','someOtherTopic']
 });
