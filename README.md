@@ -22,7 +22,7 @@ import {
 } from 'waddup';
 
 // CommonJS
-const waddup = require('waddup');
+const waddup = require('waddup').default;
 
 // script
 const waddup = window.waddup;
