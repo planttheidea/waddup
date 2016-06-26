@@ -60,7 +60,7 @@ div.addEventListener('click', () => {
 
 **subscribe** 
 
-*returns `{number}` id of subscription, or `{array<number>}` of ids based on topic(s) passed
+*returns `{number}` id of subscription, or `{array<number>}` of ids based on topic(s) passed*
 
 Subscribe to a topic, so that a specific function you pass in will be executed upon each publishing of that topic.
 * topic(s) `{string|array<string>}` *required*
@@ -105,7 +105,7 @@ unsubscribe(peristentSubscription);
 
 **getSubscriptions**
 
-*returns `{object}` map of `{[topic]: array<object>}` of functions to topic
+*returns `{object}` map of `{[topic]: array<object>}` of functions to topic*
 
 Convenience function to see the complete list of subscriptions at any given time
 
