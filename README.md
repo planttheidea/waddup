@@ -50,7 +50,7 @@ import {
 var div = document.getElementById('div');
 
 div.addEventListener('click', () => {
-  publisH('div-clicked');
+  publish('div-clicked');
 
   publish('div-clicked-with-id', {
     id: div.id
@@ -77,7 +77,7 @@ import {
     subscribe
 } from 'waddup';
 
-const persistentSubscription = subscribe('div-clicked', (topic, data) => {
+const persistentSubscription = subscribe('div-clicked-with-id', (topic, data) => {
     console.log(`${topic} fired with data: `, data);
 });
 
@@ -100,7 +100,7 @@ import {
     unsubscribe
 } from 'waddup';
 
-unsubscribe(peristentSubscription);
+unsubscribe(persistentSubscription);
 ```
 
 **getSubscriptions**
