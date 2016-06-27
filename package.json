@@ -15,7 +15,7 @@
   "bugs": {
     "url": "https://github.com/planttheidea/waddup/issues"
   },
-  "description": "Immutable JS ojbects with a natural API",
+  "description": "A ridiculously tiny pubsub manager with no dependencies",
   "devDependencies": {
     "ava": "^0.15.2",
     "babel": "6.5.2",
@@ -61,5 +61,5 @@
     "test:watch": "NODE_ENV=test ava --no-cache --watch",
     "transpile": "./node_modules/babel-cli/lib/babel/index.js -d lib/ src/"
   },
-  "version": "1.0.0"
+  "version": "1.0.1"
 }

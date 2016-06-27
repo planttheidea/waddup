@@ -1,7 +1,7 @@
 waddup
 ===
 
-A simple publish / subscribe library without dependencies
+A ridiculously tiny pubsub manager with no dependencies
 
 #### Purpose
 
