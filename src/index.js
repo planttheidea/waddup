@@ -36,28 +36,32 @@ const getType = (object) => {
 };
 
 /**
- * unsubscribe ID from the topic it was originally allocated to
+ * unsubscribe ID from the topic it was originally allocated to if it exists
  *
  * @param {string} id
  */
 const performUnsubscribe = (id) => {
-    const {
-        subscription,
-        topic
-    } = ids[id];
-    const subscribers = subscriptions[topic];
-    const indexOfSubscription = subscribers.indexOf(subscription);
+    const topicSubscription = ids[id];
 
-    if (indexOfSubscription !== -1) {
-        subscriptions[topic] = [
-            ...subscribers.slice(0, indexOfSubscription),
-            ...subscribers.slice(indexOfSubscription + 1)
-        ];
+    if (topicSubscription) {
+        const {
+          subscription,
+          topic
+        } = ids[id];
+        const subscribers = subscriptions[topic];
+        const indexOfSubscription = subscribers.indexOf(subscription);
 
-        delete ids[id];
+        if (indexOfSubscription !== -1) {
+            subscriptions[topic] = [
+                ...subscribers.slice(0, indexOfSubscription),
+                ...subscribers.slice(indexOfSubscription + 1)
+            ];
 
-        if (!subscriptions[topic].length) {
-            delete subscriptions[topic];
+            delete ids[id];
+
+            if (!subscriptions[topic].length) {
+                delete subscriptions[topic];
+            }
         }
     }
 };
