@@ -2,41 +2,41 @@ var waddup =
 /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
-
+/******/
 /******/ 	// The require function
 /******/ 	function __webpack_require__(moduleId) {
-
+/******/
 /******/ 		// Check if module is in cache
 /******/ 		if(installedModules[moduleId])
 /******/ 			return installedModules[moduleId].exports;
-
+/******/
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = installedModules[moduleId] = {
 /******/ 			exports: {},
 /******/ 			id: moduleId,
 /******/ 			loaded: false
 /******/ 		};
-
+/******/
 /******/ 		// Execute the module function
 /******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-
+/******/
 /******/ 		// Flag the module as loaded
 /******/ 		module.loaded = true;
-
+/******/
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
 /******/ 	}
-
-
+/******/
+/******/
 /******/ 	// expose the modules object (__webpack_modules__)
 /******/ 	__webpack_require__.m = modules;
-
+/******/
 /******/ 	// expose the module cache
 /******/ 	__webpack_require__.c = installedModules;
-
+/******/
 /******/ 	// __webpack_public_path__
 /******/ 	__webpack_require__.p = "";
-
+/******/
 /******/ 	// Load entry module and return exports
 /******/ 	return __webpack_require__(0);
 /******/ })
@@ -52,7 +52,198 @@ var waddup =
 /* 1 */
 /***/ function(module, exports) {
 
-	eval("'use strict';\n\nObject.defineProperty(exports, \"__esModule\", {\n    value: true\n});\n\nfunction _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }\n\n/**\n * convenience function, returning pure map\n *\n * @return {{}}\n */\nvar createBareObject = function createBareObject() {\n    return Object.create(null);\n};\n\nvar subscriptions = createBareObject(),\n    ids = createBareObject(),\n    uid = -1;\n\n/**\n * empty function used for defaults\n */\nvar noop = function noop() {};\n\n/**\n * get all subscriptions currently in object\n *\n * @return {object}\n */\nvar getSubscriptions = function getSubscriptions() {\n    return subscriptions;\n};\n\n/**\n * based on object passed, get its type in lowercase string format\n *\n * @param {any} object\n * @return {string}\n */\nvar getType = function getType(object) {\n    return Object.prototype.toString.call(object).replace(/^\\[object (.+)\\]$/, '$1').toLowerCase();\n};\n\n/**\n * unsubscribe ID from the topic it was originally allocated to if it exists\n *\n * @param {string} id\n */\nvar performUnsubscribe = function performUnsubscribe(id) {\n    var topicSubscription = ids[id];\n\n    if (topicSubscription) {\n        var _ids$id = ids[id];\n        var subscription = _ids$id.subscription;\n        var topic = _ids$id.topic;\n\n        var subscribers = subscriptions[topic];\n        var indexOfSubscription = subscribers.indexOf(subscription);\n\n        if (indexOfSubscription !== -1) {\n            subscriptions[topic] = [].concat(_toConsumableArray(subscribers.slice(0, indexOfSubscription)), _toConsumableArray(subscribers.slice(indexOfSubscription + 1)));\n\n            delete ids[id];\n\n            if (!subscriptions[topic].length) {\n                delete subscriptions[topic];\n            }\n        }\n    }\n};\n\n/**\n * add function to array of subscriptions and return the id of the subscription\n *\n * @param {string} topic\n * @param {function} topicFunction\n * @param {object} options={}\n * @return {number}\n */\nvar performSubscribe = function performSubscribe(topic) {\n    var topicFunction = arguments.length <= 1 || arguments[1] === undefined ? noop : arguments[1];\n    var options = arguments[2];\n\n    var id = ++uid;\n    var subscribers = subscriptions[topic] || [];\n\n    var _options$isPublishedO = options.isPublishedOnce;\n    var isPublishedOnce = _options$isPublishedO === undefined ? false : _options$isPublishedO;\n\n\n    var callTopicFunction = function callTopicFunction(topicCalled, data) {\n        topicFunction(topicCalled, data);\n    };\n    var subscription = !isPublishedOnce ? callTopicFunction : function (topicCalled, data) {\n        callTopicFunction(topicCalled, data);\n\n        performUnsubscribe(id);\n    };\n\n    ids[id] = {\n        subscription: subscription,\n        topic: topic\n    };\n\n    subscriptions[topic] = [].concat(_toConsumableArray(subscribers), [subscription]);\n\n    return id;\n};\n\n/**\n * trigger call of all functions subscribed to topic, passing the data to it\n *\n * @param {string} topic\n * @param {any} data\n */\nvar publish = function publish(topic, data) {\n    if (!topic) {\n        throw new Error('You must provide a topic to publish.');\n    }\n\n    var subscriptionsToPublish = subscriptions[topic] || [];\n\n    subscriptionsToPublish.forEach(function (subscription) {\n        subscription(topic, data);\n    });\n};\n\n/**\n * subscribe fn to topic(s) based on options passed\n *\n * @param {string|array<string>} topics\n * @param {function} fn\n * @param {object} options\n * @return {number|array<number>}\n */\nvar subscribe = function subscribe(topics, fn) {\n    var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];\n\n    var topicsType = getType(topics);\n\n    switch (topicsType) {\n        case 'string':\n            return performSubscribe(topics, fn, options);\n\n        case 'array':\n            return topics.map(function (topic) {\n                return performSubscribe(topic, fn, options);\n            });\n\n        default:\n            throw new Error('You must pass either the name of the topic or an array of topics to subscribe to.');\n    }\n};\n\n/**\n * unsubscribe id(s) from future publishes\n *\n * @param {string|array<string>} ids\n */\nvar unsubscribe = function unsubscribe(ids) {\n    var idsType = getType(ids);\n\n    switch (idsType) {\n        case 'number':\n            performUnsubscribe(ids);\n            break;\n\n        case 'array':\n            ids.forEach(function (id) {\n                performUnsubscribe(id);\n            });\n\n            break;\n\n        default:\n            throw new Error('You must pass either the ID or an array of IDs to unsubscribe from.');\n    }\n};\n\nexports.getSubscriptions = getSubscriptions;\nexports.publish = publish;\nexports.subscribe = subscribe;\nexports.unsubscribe = unsubscribe;\nexports.default = {\n    getSubscriptions: getSubscriptions,\n    publish: publish,\n    subscribe: subscribe,\n    unsubscribe: unsubscribe\n};\n//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiMS5qcyIsInNvdXJjZXMiOlsid2VicGFjazovLy9zcmMvaW5kZXguanM/MWZkZiJdLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIGNvbnZlbmllbmNlIGZ1bmN0aW9uLCByZXR1cm5pbmcgcHVyZSBtYXBcbiAqXG4gKiBAcmV0dXJuIHt7fX1cbiAqL1xuY29uc3QgY3JlYXRlQmFyZU9iamVjdCA9ICgpID0+IHtcbiAgICByZXR1cm4gT2JqZWN0LmNyZWF0ZShudWxsKTtcbn07XG5cbmxldCBzdWJzY3JpcHRpb25zID0gY3JlYXRlQmFyZU9iamVjdCgpLFxuICAgIGlkcyA9IGNyZWF0ZUJhcmVPYmplY3QoKSxcbiAgICB1aWQgPSAtMTtcblxuLyoqXG4gKiBlbXB0eSBmdW5jdGlvbiB1c2VkIGZvciBkZWZhdWx0c1xuICovXG5jb25zdCBub29wID0gKCkgPT4ge307XG5cbi8qKlxuICogZ2V0IGFsbCBzdWJzY3JpcHRpb25zIGN1cnJlbnRseSBpbiBvYmplY3RcbiAqXG4gKiBAcmV0dXJuIHtvYmplY3R9XG4gKi9cbmNvbnN0IGdldFN1YnNjcmlwdGlvbnMgPSAoKSA9PiB7XG4gIHJldHVybiBzdWJzY3JpcHRpb25zO1xufTtcblxuLyoqXG4gKiBiYXNlZCBvbiBvYmplY3QgcGFzc2VkLCBnZXQgaXRzIHR5cGUgaW4gbG93ZXJjYXNlIHN0cmluZyBmb3JtYXRcbiAqXG4gKiBAcGFyYW0ge2FueX0gb2JqZWN0XG4gKiBAcmV0dXJuIHtzdHJpbmd9XG4gKi9cbmNvbnN0IGdldFR5cGUgPSAob2JqZWN0KSA9PiB7XG4gICAgcmV0dXJuIE9iamVjdC5wcm90b3R5cGUudG9TdHJpbmcuY2FsbChvYmplY3QpLnJlcGxhY2UoL15cXFtvYmplY3QgKC4rKVxcXSQvLCAnJDEnKS50b0xvd2VyQ2FzZSgpO1xufTtcblxuLyoqXG4gKiB1bnN1YnNjcmliZSBJRCBmcm9tIHRoZSB0b3BpYyBpdCB3YXMgb3JpZ2luYWxseSBhbGxvY2F0ZWQgdG8gaWYgaXQgZXhpc3RzXG4gKlxuICogQHBhcmFtIHtzdHJpbmd9IGlkXG4gKi9cbmNvbnN0IHBlcmZvcm1VbnN1YnNjcmliZSA9IChpZCkgPT4ge1xuICAgIGNvbnN0IHRvcGljU3Vic2NyaXB0aW9uID0gaWRzW2lkXTtcblxuICAgIGlmICh0b3BpY1N1YnNjcmlwdGlvbikge1xuICAgICAgICBjb25zdCB7XG4gICAgICAgICAgc3Vic2NyaXB0aW9uLFxuICAgICAgICAgIHRvcGljXG4gICAgICAgIH0gPSBpZHNbaWRdO1xuICAgICAgICBjb25zdCBzdWJzY3JpYmVycyA9IHN1YnNjcmlwdGlvbnNbdG9waWNdO1xuICAgICAgICBjb25zdCBpbmRleE9mU3Vic2NyaXB0aW9uID0gc3Vic2NyaWJlcnMuaW5kZXhPZihzdWJzY3JpcHRpb24pO1xuXG4gICAgICAgIGlmIChpbmRleE9mU3Vic2NyaXB0aW9uICE9PSAtMSkge1xuICAgICAgICAgICAgc3Vic2NyaXB0aW9uc1t0b3BpY10gPSBbXG4gICAgICAgICAgICAgICAgLi4uc3Vic2NyaWJlcnMuc2xpY2UoMCwgaW5kZXhPZlN1YnNjcmlwdGlvbiksXG4gICAgICAgICAgICAgICAgLi4uc3Vic2NyaWJlcnMuc2xpY2UoaW5kZXhPZlN1YnNjcmlwdGlvbiArIDEpXG4gICAgICAgICAgICBdO1xuXG4gICAgICAgICAgICBkZWxldGUgaWRzW2lkXTtcblxuICAgICAgICAgICAgaWYgKCFzdWJzY3JpcHRpb25zW3RvcGljXS5sZW5ndGgpIHtcbiAgICAgICAgICAgICAgICBkZWxldGUgc3Vic2NyaXB0aW9uc1t0b3BpY107XG4gICAgICAgICAgICB9XG4gICAgICAgIH1cbiAgICB9XG59O1xuXG4vKipcbiAqIGFkZCBmdW5jdGlvbiB0byBhcnJheSBvZiBzdWJzY3JpcHRpb25zIGFuZCByZXR1cm4gdGhlIGlkIG9mIHRoZSBzdWJzY3JpcHRpb25cbiAqXG4gKiBAcGFyYW0ge3N0cmluZ30gdG9waWNcbiAqIEBwYXJhbSB7ZnVuY3Rpb259IHRvcGljRnVuY3Rpb25cbiAqIEBwYXJhbSB7b2JqZWN0fSBvcHRpb25zPXt9XG4gKiBAcmV0dXJuIHtudW1iZXJ9XG4gKi9cbmNvbnN0IHBlcmZvcm1TdWJzY3JpYmUgPSAodG9waWMsIHRvcGljRnVuY3Rpb24gPSBub29wLCBvcHRpb25zKSA9PiB7XG4gICAgY29uc3QgaWQgPSArK3VpZDtcbiAgICBjb25zdCBzdWJzY3JpYmVycyA9IHN1YnNjcmlwdGlvbnNbdG9waWNdIHx8IFtdO1xuXG4gICAgY29uc3Qge1xuICAgICAgICBpc1B1Ymxpc2hlZE9uY2UgPSBmYWxzZVxuICAgIH0gPSBvcHRpb25zO1xuXG4gICAgY29uc3QgY2FsbFRvcGljRnVuY3Rpb24gPSAodG9waWNDYWxsZWQsIGRhdGEpID0+IHtcbiAgICAgICAgdG9waWNGdW5jdGlvbih0b3BpY0NhbGxlZCwgZGF0YSk7XG4gICAgfTtcbiAgICBjb25zdCBzdWJzY3JpcHRpb24gPSAhaXNQdWJsaXNoZWRPbmNlID8gY2FsbFRvcGljRnVuY3Rpb24gOiAodG9waWNDYWxsZWQsIGRhdGEpID0+IHtcbiAgICAgICAgY2FsbFRvcGljRnVuY3Rpb24odG9waWNDYWxsZWQsIGRhdGEpO1xuXG4gICAgICAgIHBlcmZvcm1VbnN1YnNjcmliZShpZCk7XG4gICAgfTtcblxuICAgIGlkc1tpZF0gPSB7XG4gICAgICAgIHN1YnNjcmlwdGlvbixcbiAgICAgICAgdG9waWNcbiAgICB9O1xuXG4gICAgc3Vic2NyaXB0aW9uc1t0b3BpY10gPSBbXG4gICAgICAgIC4uLnN1YnNjcmliZXJzLFxuICAgICAgICBzdWJzY3JpcHRpb25cbiAgICBdO1xuXG4gICAgcmV0dXJuIGlkO1xufTtcblxuXG4vKipcbiAqIHRyaWdnZXIgY2FsbCBvZiBhbGwgZnVuY3Rpb25zIHN1YnNjcmliZWQgdG8gdG9waWMsIHBhc3NpbmcgdGhlIGRhdGEgdG8gaXRcbiAqXG4gKiBAcGFyYW0ge3N0cmluZ30gdG9waWNcbiAqIEBwYXJhbSB7YW55fSBkYXRhXG4gKi9cbmNvbnN0IHB1Ymxpc2ggPSAodG9waWMsIGRhdGEpID0+IHtcbiAgICBpZiAoIXRvcGljKSB7XG4gICAgICAgIHRocm93IG5ldyBFcnJvcignWW91IG11c3QgcHJvdmlkZSBhIHRvcGljIHRvIHB1Ymxpc2guJyk7XG4gICAgfVxuXG4gICAgbGV0IHN1YnNjcmlwdGlvbnNUb1B1Ymxpc2ggPSBzdWJzY3JpcHRpb25zW3RvcGljXSB8fCBbXTtcblxuICAgIHN1YnNjcmlwdGlvbnNUb1B1Ymxpc2guZm9yRWFjaCgoc3Vic2NyaXB0aW9uKSA9PiB7XG4gICAgICAgIHN1YnNjcmlwdGlvbih0b3BpYywgZGF0YSk7XG4gICAgfSk7XG59O1xuXG4vKipcbiAqIHN1YnNjcmliZSBmbiB0byB0b3BpYyhzKSBiYXNlZCBvbiBvcHRpb25zIHBhc3NlZFxuICpcbiAqIEBwYXJhbSB7c3RyaW5nfGFycmF5PHN0cmluZz59IHRvcGljc1xuICogQHBhcmFtIHtmdW5jdGlvbn0gZm5cbiAqIEBwYXJhbSB7b2JqZWN0fSBvcHRpb25zXG4gKiBAcmV0dXJuIHtudW1iZXJ8YXJyYXk8bnVtYmVyPn1cbiAqL1xuY29uc3Qgc3Vic2NyaWJlID0gKHRvcGljcywgZm4sIG9wdGlvbnMgPSB7fSkgPT4ge1xuICAgIGNvbnN0IHRvcGljc1R5cGUgPSBnZXRUeXBlKHRvcGljcyk7XG5cbiAgICBzd2l0Y2ggKHRvcGljc1R5cGUpIHtcbiAgICAgICAgY2FzZSAnc3RyaW5nJzpcbiAgICAgICAgICAgIHJldHVybiBwZXJmb3JtU3Vic2NyaWJlKHRvcGljcywgZm4sIG9wdGlvbnMpO1xuXG4gICAgICAgIGNhc2UgJ2FycmF5JzpcbiAgICAgICAgICAgIHJldHVybiB0b3BpY3MubWFwKCh0b3BpYykgPT4ge1xuICAgICAgICAgICAgICAgcmV0dXJuIHBlcmZvcm1TdWJzY3JpYmUodG9waWMsIGZuLCBvcHRpb25zKTtcbiAgICAgICAgICAgIH0pO1xuXG4gICAgICAgIGRlZmF1bHQ6XG4gICAgICAgICAgICB0aHJvdyBuZXcgRXJyb3IoJ1lvdSBtdXN0IHBhc3MgZWl0aGVyIHRoZSBuYW1lIG9mIHRoZSB0b3BpYyBvciBhbiBhcnJheSBvZiB0b3BpY3MgdG8gc3Vic2NyaWJlIHRvLicpO1xuICAgIH1cbn07XG5cbi8qKlxuICogdW5zdWJzY3JpYmUgaWQocykgZnJvbSBmdXR1cmUgcHVibGlzaGVzXG4gKlxuICogQHBhcmFtIHtzdHJpbmd8YXJyYXk8c3RyaW5nPn0gaWRzXG4gKi9cbmNvbnN0IHVuc3Vic2NyaWJlID0gKGlkcykgPT4ge1xuICAgIGNvbnN0IGlkc1R5cGUgPSBnZXRUeXBlKGlkcyk7XG5cbiAgICBzd2l0Y2ggKGlkc1R5cGUpIHtcbiAgICAgICAgY2FzZSAnbnVtYmVyJzpcbiAgICAgICAgICAgIHBlcmZvcm1VbnN1YnNjcmliZShpZHMpO1xuICAgICAgICAgICAgYnJlYWs7XG5cbiAgICAgICAgY2FzZSAnYXJyYXknOlxuICAgICAgICAgICAgaWRzLmZvckVhY2goKGlkKSA9PiB7XG4gICAgICAgICAgICAgICBwZXJmb3JtVW5zdWJzY3JpYmUoaWQpO1xuICAgICAgICAgICAgfSk7XG5cbiAgICAgICAgICAgIGJyZWFrO1xuXG4gICAgICAgIGRlZmF1bHQ6XG4gICAgICAgICAgICB0aHJvdyBuZXcgRXJyb3IoJ1lvdSBtdXN0IHBhc3MgZWl0aGVyIHRoZSBJRCBvciBhbiBhcnJheSBvZiBJRHMgdG8gdW5zdWJzY3JpYmUgZnJvbS4nKTtcbiAgICB9XG59O1xuXG5leHBvcnQge2dldFN1YnNjcmlwdGlvbnN9O1xuZXhwb3J0IHtwdWJsaXNofTtcbmV4cG9ydCB7c3Vic2NyaWJlfTtcbmV4cG9ydCB7dW5zdWJzY3JpYmV9O1xuXG5leHBvcnQgZGVmYXVsdCB7XG4gICAgZ2V0U3Vic2NyaXB0aW9ucyxcbiAgICBwdWJsaXNoLFxuICAgIHN1YnNjcmliZSxcbiAgICB1bnN1YnNjcmliZVxufTtcblxuXG5cbi8qKiBXRUJQQUNLIEZPT1RFUiAqKlxuICoqIHNyYy9pbmRleC5qc1xuICoqLyJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7OztBQUtBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFBQTtBQUFBO0FBQ0E7Ozs7QUFNQTtBQUNBOzs7Ozs7QUFNQTtBQUNBO0FBQ0E7QUFDQTs7Ozs7OztBQU9BO0FBQ0E7QUFDQTtBQUNBOzs7Ozs7QUFNQTtBQUNBO0FBQ0E7QUFDQTtBQUFBO0FBQUE7QUFBQTtBQUNBO0FBSUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBSUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBOzs7Ozs7Ozs7QUFTQTtBQUFBO0FBQUE7QUFDQTtBQUFBO0FBQ0E7QUFDQTtBQUhBO0FBQUE7QUFDQTtBQUNBO0FBTUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBRkE7QUFDQTtBQUlBO0FBQ0E7QUFJQTtBQUNBO0FBQ0E7Ozs7Ozs7QUFRQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7Ozs7Ozs7OztBQVNBO0FBQUE7QUFDQTtBQUFBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBVkE7QUFZQTtBQUNBOzs7Ozs7QUFNQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBYkE7QUFlQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFFQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBSkEiLCJzb3VyY2VSb290IjoiIn0=");
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+	
+	/**
+	 * convenience function, returning pure map
+	 *
+	 * @return {{}}
+	 */
+	var createBareObject = function createBareObject() {
+	    return Object.create(null);
+	};
+	
+	var subscriptions = createBareObject(),
+	    ids = createBareObject(),
+	    uid = -1;
+	
+	/**
+	 * empty function used for defaults
+	 */
+	var noop = function noop() {};
+	
+	/**
+	 * get all subscriptions currently in object
+	 *
+	 * @return {object}
+	 */
+	var getSubscriptions = function getSubscriptions() {
+	    return subscriptions;
+	};
+	
+	/**
+	 * based on object passed, get its type in lowercase string format
+	 *
+	 * @param {any} object
+	 * @return {string}
+	 */
+	var getType = function getType(object) {
+	    return Object.prototype.toString.call(object).replace(/^\[object (.+)\]$/, '$1').toLowerCase();
+	};
+	
+	/**
+	 * unsubscribe ID from the topic it was originally allocated to if it exists
+	 *
+	 * @param {string} id
+	 */
+	var performUnsubscribe = function performUnsubscribe(id) {
+	    var topicSubscription = ids[id];
+	
+	    if (topicSubscription) {
+	        var _ids$id = ids[id];
+	        var subscription = _ids$id.subscription;
+	        var topic = _ids$id.topic;
+	
+	        var subscribers = subscriptions[topic];
+	        var indexOfSubscription = subscribers.indexOf(subscription);
+	
+	        if (indexOfSubscription !== -1) {
+	            subscriptions[topic] = [].concat(_toConsumableArray(subscribers.slice(0, indexOfSubscription)), _toConsumableArray(subscribers.slice(indexOfSubscription + 1)));
+	
+	            delete ids[id];
+	
+	            if (!subscriptions[topic].length) {
+	                delete subscriptions[topic];
+	            }
+	        }
+	    }
+	};
+	
+	/**
+	 * add function to array of subscriptions and return the id of the subscription
+	 *
+	 * @param {string} topic
+	 * @param {function} topicFunction
+	 * @param {object} options={}
+	 * @return {number}
+	 */
+	var performSubscribe = function performSubscribe(topic) {
+	    var topicFunction = arguments.length <= 1 || arguments[1] === undefined ? noop : arguments[1];
+	    var options = arguments[2];
+	
+	    var id = ++uid;
+	    var subscribers = subscriptions[topic] || [];
+	
+	    var _options$isPublishedO = options.isPublishedOnce;
+	    var isPublishedOnce = _options$isPublishedO === undefined ? false : _options$isPublishedO;
+	
+	
+	    var callTopicFunction = function callTopicFunction(topicCalled, data) {
+	        topicFunction(topicCalled, data);
+	    };
+	    var subscription = !isPublishedOnce ? callTopicFunction : function (topicCalled, data) {
+	        callTopicFunction(topicCalled, data);
+	
+	        performUnsubscribe(id);
+	    };
+	
+	    ids[id] = {
+	        subscription: subscription,
+	        topic: topic
+	    };
+	
+	    subscriptions[topic] = [].concat(_toConsumableArray(subscribers), [subscription]);
+	
+	    return id;
+	};
+	
+	/**
+	 * trigger call of all functions subscribed to topic, passing the data to it
+	 *
+	 * @param {string} topic
+	 * @param {any} data
+	 */
+	var publish = function publish(topic, data) {
+	    if (!topic) {
+	        throw new Error('You must provide a topic to publish.');
+	    }
+	
+	    var subscriptionsToPublish = subscriptions[topic] || [];
+	
+	    subscriptionsToPublish.forEach(function (subscription) {
+	        subscription(topic, data);
+	    });
+	};
+	
+	/**
+	 * subscribe fn to topic(s) based on options passed
+	 *
+	 * @param {string|array<string>} topics
+	 * @param {function} fn
+	 * @param {object} options
+	 * @return {number|array<number>}
+	 */
+	var subscribe = function subscribe(topics, fn) {
+	    var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+	
+	    var topicsType = getType(topics);
+	
+	    switch (topicsType) {
+	        case 'string':
+	            return performSubscribe(topics, fn, options);
+	
+	        case 'array':
+	            return topics.map(function (topic) {
+	                return performSubscribe(topic, fn, options);
+	            });
+	
+	        default:
+	            throw new Error('You must pass either the name of the topic or an array of topics to subscribe to.');
+	    }
+	};
+	
+	/**
+	 * unsubscribe id(s) from future publishes
+	 *
+	 * @param {string|array<string>} ids
+	 */
+	var unsubscribe = function unsubscribe(ids) {
+	    var idsType = getType(ids);
+	
+	    switch (idsType) {
+	        case 'number':
+	            performUnsubscribe(ids);
+	            break;
+	
+	        case 'array':
+	            ids.forEach(function (id) {
+	                performUnsubscribe(id);
+	            });
+	
+	            break;
+	
+	        default:
+	            throw new Error('You must pass either the ID or an array of IDs to unsubscribe from.');
+	    }
+	};
+	
+	exports.getSubscriptions = getSubscriptions;
+	exports.publish = publish;
+	exports.subscribe = subscribe;
+	exports.unsubscribe = unsubscribe;
+	exports.default = {
+	    getSubscriptions: getSubscriptions,
+	    publish: publish,
+	    subscribe: subscribe,
+	    unsubscribe: unsubscribe
+	};
 
 /***/ }
 /******/ ]);
+//# sourceMappingURL=waddup.js.map

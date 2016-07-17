@@ -42,7 +42,10 @@
   },
   "homepage": "https://github.com/planttheidea/waddup#readme",
   "keywords": [
-    "immutable",
+    "publish",
+    "subscribe",
+    "unsubscribe",
+    "pubsub",
     "waddup"
   ],
   "license": "MIT",
@@ -63,5 +66,5 @@
     "test:watch": "NODE_ENV=test ava --no-cache --watch",
     "transpile": "./node_modules/babel-cli/lib/babel/index.js -d lib/ src/"
   },
-  "version": "1.0.2"
+  "version": "1.0.3"
 }
