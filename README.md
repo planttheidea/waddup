@@ -1,13 +1,13 @@
-waddup
-===
+# waddup
 
-A ridiculously tiny pubsub manager with no dependencies
+### Table of contents
+* [Usage](#usage)
+* [Size](#size)
+* [API](#api)
+* [Support](#support)
+* [Development](#development)
 
-#### Purpose
-
-To provide straigntforward and multifunctional publish / subscribe capabilities that is not dependent on another library or framework. It is built with the intention of having as minimal a footprint as possible, while still providing versatility in its usage.
-
-#### Usage
+### Usage
 
 ```javascript
 // ES2015
@@ -15,10 +15,10 @@ import waddup from 'waddup';
 
 // or you can import individual functions
 import {
-   getSubscriptions,
-   publish,
-   subscribe,
-   unsubscribe
+  getSubscriptions,
+  publish,
+  subscribe,
+  unsubscribe
 } from 'waddup';
 
 // CommonJS
@@ -28,110 +28,149 @@ const waddup = require('waddup').default;
 const waddup = window.waddup;
 ```
 
-#### Size
+### Size
 
-* Uncompressed: 13.3KB
-* Minified: 1.83KB
-* Minified and gzipped: 997B
+* Uncompressed: 14.8kB
+* Minified: 3.39kB
+* Minified and gzipped: 1.5kB
 
-**publish**
+### API
 
-Publish a topic, usually upon some other event. This topic can be subscribed to by an unlimited number of functions.
-* topic `{string}` *required*
-  * Unique name given to topic
-* data `{any}` *optional*
+`publish(topic)`
+
+Publish a topic, usually upon some other event. This topic can be subscribed to by an unlimited number of functions, and can be any object type.
+* topic `{*}` *required*
+  * Any object you want to use as a unique identifier
+* data `{*}` *optional*
   * Data that is passed to the second argument of the subscription
 
 ```javascript
 import {
-    publish
+  publish
 } from 'waddup';
 
-var div = document.getElementById('div');
+const div = document.getElementById('div');
 
 div.addEventListener('click', () => {
+  // go classic and use a string
   publish('div-clicked');
 
-  publish('div-clicked-with-id', {
+  // or use whatever you want
+  publish(div, {
     id: div.id
   });
 });
 ```
 
-**subscribe** 
+`subscribe(topic[, options][, fn]])`
 
-*returns `{number}` id of subscription, or `{array<number>}` of ids based on topic(s) passed*
+*returns `{number}` id of subscription, or `{Array<number>}` of ids based on topic(s) passed*
 
 Subscribe to a topic, so that a specific function you pass in will be executed upon each publishing of that topic.
-* topic(s) `{string|array<string>}` *required*
+* topic(s) `{*|Array<*>}` *required*
   * Topic(s) to which you are subscribing
-* fn `{function}` *required*
-  * Function that will be executed upon each publishing of given topic
-* options `{object}` *optional*
+* options `{object}` *optional, defaults to fn*
   * Options passed to subscription action
   * Available options:
-    * isPublishedOnce `{boolean}` *defaults to false*
+    * maxPublishCount `{number}` *defaults to Infinity*
+* fn `{function}` *required*
+  * Function that will be executed upon each publishing of given topic
 
 ```javascript
 import {
     subscribe
 } from 'waddup';
 
-const persistentSubscription = subscribe('div-clicked-with-id', (topic, data) => {
-    console.log(`${topic} fired with data: `, data);
+// do a standard subscription
+const div = document.getElementById('div');
+
+const persistentSubscription = subscribe(div, ({data, topic}) => {
+  console.log(topic, data);
 });
 
-const oneTimeOptions = {
-    isPublishedOnce: true
+// or provide options
+const options = {
+  maxPublishCount: 1
 };
-const oneTimeSubscription = subscribe('div-clicked', (topic) => {
-    console.log(`This callback for ${topic} will only be fired once.`);
-), oneTimeOptions);
+const oneTimeSubscription = subscribe('div-clicked', options, ({topic}) => {
+  console.log(`This callback for ${topic} will only be fired once.`);
+});
+
+// or do multiple subscriptions that use the same handler at once
+const subscriptions = subscribe([div, 'div-clicked'], ({topic}) => {
+  console.log(`${topic} will fire for either one of the published events!`);
+});
 ```
 
-**unsubscribe**
+`unsubscribe(id)`
 
 Remove subscription(s) to a topic based on subscription id passed in.
-* id(s) `{number|array<number>}` *required*
+* id(s) `{number|Array<number>}` *required*
   * Single id, or array of ids, to remove subscriptions for
 
 ```javascript
 import {
-    unsubscribe
+  subscribe
+  unsubscribe
 } from 'waddup';
 
-unsubscribe(persistentSubscription);
+// unsubscribe a single id
+const id = subscribe('foo', () => {});
+
+unsubscribe(id);
+
+// or multiples
+const otherId = subscribe('bar', () => {});
+
+unsubscribe([id, otherId]);
 ```
 
-**getSubscriptions**
+`getSubscriptions([...topics])`;
 
-*returns `{object}` map of `{[topic]: array<object>}` of functions to topic*
+*returns `{Array<Object>|Object|Map}` either the complete list of subscriptions, a subset Array of subscriptions, or a single subscription*
 
-Convenience function to see the complete list of subscriptions at any given time
+Convenience function to see subscriptions that are currently active. If no topics are passed you get the complete list, or if you pass a topic you get that subscription, or if you pass multiple topics you get an Array of matching subscriptions.
 
 ```javascript
 import {
-    getSubscriptions
+  getSubscriptions,
+  subscribe
 } from 'waddup';
 
-const subscriptions = getSubscriptions();
+const array = ['bar', 'baz'];
 
-console.log(subscriptions);
+subscribe('foo', () => {
+  console.log('foo');
+});
+subscribe(array, () => {
+  console.log('array');
+});
 
-/* let's pretend I've added a bunch, so it provides:
-{
-    foo: [
-        fooFunction,
-        fooFunction2
-    ],
-    bar: [
-        barFunction
-    ]
-}
-*/
+const subscriptions = getSubscriptions(); // Map {"foo" => 
 ```
 
-#### Development
+### Support
+
+Support for the following browsers natively:
+* Edge (all)
+* Chrome
+* Chrome for Android
+* Firefox
+* Firefox Mobile
+* Opera (25+)
+* Safari (7.1+)
+* Safari Mobile (8+)
+* Internet Explorer (11+)
+
+Support for the following browsers when including polyfill for [Map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map):
+* Opera (15-)
+* Safari (7-)
+* Safari Mobile (7.1-)
+* Internet Explorer (9-10)
+* Android Browser (all)
+* Opera Mobile (all)
+
+### Development
 
 Standard practice, clone the repo and `npm i` to get the dependencies. The following npm scripts are available:
 * build => build unminified dist version with source map and NODE_ENV=development via webpack
