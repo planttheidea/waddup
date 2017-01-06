@@ -7,6 +7,14 @@
 * [Support](#support)
 * [Development](#development)
 
+### Breaking change notice
+
+If you were using v1.x.x, there are a few changes when moving to v2.x.x:
+* `Map` polyfill may be required depending on your targeted browser support (check [support])
+  * Previously used standard objects, `Map` change was to allow non-string objects
+* Subscribe handlers now receive a single parameter, an object with `data` and `topic` as properties
+  * Previously received `topic` and then `data` as individual parameters, change was to allow avoidance of topic reference if not needed
+
 ### Usage
 
 ```javascript
