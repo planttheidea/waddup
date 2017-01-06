@@ -1,58 +1,88 @@
 import test from 'ava';
 import sinon from 'sinon';
 
-import {
-    getSubscriptions,
-    publish,
-    subscribe,
-    unsubscribe
-} from '../src';
+import isArray from 'lodash/isArray';
+import isPlainObject from 'lodash/isPlainObject';
+import Map from 'core-js/library/fn/map';
 
-const isArray = (object) => {
-    return Object.prototype.toString.call(object) === '[object Array]';
-};
+import {
+  getSubscriptions,
+  publish,
+  subscribe,
+  unsubscribe
+} from '../src';
 
 let subscription,
     subscriptionFunction;
 
 test('if getSubscriptions returns the appropriate starting subscriptions', (t) => {
-    const subscriptions = getSubscriptions();
+  const subscriptions = getSubscriptions();
 
-    t.deepEqual(subscriptions, {});
+  t.true(subscriptions instanceof global.Map);
 });
 
 test('if subscribe adds subscription', (t) => {
-    subscriptionFunction = sinon.spy();
+  const topic = 'foo';
 
-    subscription = subscribe('foo', subscriptionFunction);
+  subscription = subscribe(topic);
 
-    const subscriptions = getSubscriptions();
+  t.is(subscription, 0);
 
-    t.is(subscription, 0);
-    t.true(isArray(subscriptions.foo));
-    t.is(subscriptions.foo.length, 1);
+  const subscriptions = getSubscriptions(topic);
+
+  t.true(isPlainObject(subscriptions));
+
+  t.true(isArray(subscriptions.subscribers));
+  t.is(subscriptions.topic, topic);
+
+  const subscriber = subscriptions.subscribers[0];
+
+  t.deepEqual(subscriber.options, {});
+  t.is(subscriber.publishCount, 0);
 });
 
 test('if publishing will fire stub', (t) => {
-    const publishData = {
-        data: 'for foo'
-    };
+  subscriptionFunction = sinon.spy();
 
-    publish('foo', publishData);
+  const topic = {
+    foo: 'bar'
+  };
+  const data = {
+    data: 'for foo'
+  };
 
-    t.true(subscriptionFunction.calledOnce);
-    t.true(subscriptionFunction.calledWith('foo'));
-    t.deepEqual(subscriptionFunction.getCall(0).args[1], publishData);
+  subscription = subscribe(topic, subscriptionFunction);
+
+  publish(topic, data);
+
+  t.true(subscriptionFunction.calledOnce);
+
+  const [
+    arg
+  ] = subscriptionFunction.getCall(0).args;
+
+  t.deepEqual(arg, {
+    data,
+    topic
+  });
 });
 
 test('if unsubscribe will remove subscription', (t) => {
-    unsubscribe(subscription);
+  subscriptionFunction = sinon.spy();
 
-    const subscriptions = getSubscriptions();
+  const topic = 123;
 
-    t.deepEqual(subscriptions, {});
+  subscription = subscribe(topic);
 
-    publish('foo');
+  const subscriptions = getSubscriptions();
 
-    t.false(subscriptionFunction.calledTwice);
+  t.true(subscriptions.has(topic));
+
+  unsubscribe(subscription);
+
+  t.false(subscriptions.has(topic));
+
+  publish(topic);
+
+  t.false(subscriptionFunction.called);
 });
