@@ -6,26 +6,15 @@ const defaultConfig = require('./webpack.config');
 module.exports = Object.assign({}, defaultConfig, {
   devtool: undefined,
 
+  mode: 'production',
+
   output: Object.assign({}, defaultConfig.output, {
-    filename: 'waddup.min.js'
+    filename: 'waddup.min.js',
   }),
 
   plugins: defaultConfig.plugins.concat([
-    new webpack.optimize.UglifyJsPlugin({
-      compress: {
-        booleans: true,
-        conditionals: true,
-        drop_console: true,
-        drop_debugger: true,
-        join_vars: true,
-        screw_ie8: true,
-        sequences: true,
-        warnings: false
-      },
-      sourceMap: false
-    }),
     new OptimizeJsPlugin({
-      sourceMap: false
-    })
-  ])
+      sourceMap: false,
+    }),
+  ]),
 });

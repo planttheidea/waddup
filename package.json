@@ -4,45 +4,42 @@
     "babel": "inherit",
     "failFast": true,
     "files": [
-      "./test/utils.js",
-      "./test/index.js"
+      "test/utils.js",
+      "test/index.js"
     ],
     "require": [
-      "babel-register",
-      "babel-polyfill"
-    ]
+      "babel-register"
+    ],
+    "verbose": true
   },
   "bugs": {
     "url": "https://github.com/planttheidea/waddup/issues"
   },
   "description": "A tiny pubsub manager for the modern JS era",
   "devDependencies": {
-    "ava": "^0.17.0",
-    "babel": "6.5.2",
+    "ava": "^0.25.0",
     "babel-cli": "^6.18.0",
     "babel-eslint": "^7.1.1",
-    "babel-loader": "^6.2.10",
-    "babel-plugin-add-module-exports": "0.2.1",
-    "babel-polyfill": "^6.9.1",
-    "babel-preset-latest": "^6.16.0",
+    "babel-loader": "^7.1.5",
+    "babel-preset-env": "^1.7.0",
     "babel-preset-react": "^6.16.0",
     "babel-preset-stage-2": "^6.18.0",
     "babel-register": "^6.9.0",
     "ejs": "^2.5.5",
-    "eslint": "^3.12.2",
-    "eslint-config-rapid7": "^2.6.0",
-    "eslint-friendly-formatter": "^2.0.7",
-    "eslint-loader": "^1.6.1",
-    "html-webpack-plugin": "^2.22.0",
+    "eslint": "^5.12.0",
+    "eslint-config-rapid7": "^3.1.0",
+    "eslint-friendly-formatter": "^4.0.1",
+    "eslint-loader": "^2.1.1",
+    "html-webpack-plugin": "^3.2.0",
     "in-publish": "^2.0.0",
-    "lodash-webpack-plugin": "^0.10.7",
     "nyc": "^10.0.0",
     "optimize-js-plugin": "^0.0.4",
-    "react": "^15.2.1",
-    "react-dom": "^15.2.1",
-    "sinon": "^1.17.4",
-    "webpack": "^1.14.0",
-    "webpack-dev-server": "^1.16.2"
+    "react": "^16.7.0",
+    "react-dom": "^16.7.0",
+    "sinon": "^7.2.2",
+    "webpack": "^4.28.3",
+    "webpack-cli": "^3.2.0",
+    "webpack-dev-server": "^3.1.14"
   },
   "homepage": "https://github.com/planttheidea/waddup#readme",
   "keywords": [
@@ -72,8 +69,5 @@
     "test:watch": "NODE_ENV=test ava --watch",
     "transpile": "babel src --out-dir lib"
   },
-  "version": "2.0.0",
-  "dependencies": {
-    "lodash": "^4.17.4"
-  }
+  "version": "2.0.1"
 }

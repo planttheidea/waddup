@@ -1,19 +1,14 @@
 import test from 'ava';
 import sinon from 'sinon';
 
-import isArray from 'lodash/isArray';
-import isPlainObject from 'lodash/isPlainObject';
-import Map from 'core-js/library/fn/map';
-
 import {
   getSubscriptions,
   publish,
   subscribe,
-  unsubscribe
+  unsubscribe,
 } from '../src';
 
-let subscription,
-    subscriptionFunction;
+let subscription, subscriptionFunction;
 
 test('if getSubscriptions returns the appropriate starting subscriptions', (t) => {
   const subscriptions = getSubscriptions();
@@ -30,9 +25,9 @@ test('if subscribe adds subscription', (t) => {
 
   const subscriptions = getSubscriptions(topic);
 
-  t.true(isPlainObject(subscriptions));
+  t.true(subscriptions && subscriptions.constructor === Object);
 
-  t.true(isArray(subscriptions.subscribers));
+  t.true(Array.isArray(subscriptions.subscribers));
   t.is(subscriptions.topic, topic);
 
   const subscriber = subscriptions.subscribers[0];
@@ -45,10 +40,10 @@ test('if publishing will fire stub', (t) => {
   subscriptionFunction = sinon.spy();
 
   const topic = {
-    foo: 'bar'
+    foo: 'bar',
   };
   const data = {
-    data: 'for foo'
+    data: 'for foo',
   };
 
   subscription = subscribe(topic, subscriptionFunction);
@@ -57,13 +52,11 @@ test('if publishing will fire stub', (t) => {
 
   t.true(subscriptionFunction.calledOnce);
 
-  const [
-    arg
-  ] = subscriptionFunction.getCall(0).args;
+  const [arg] = subscriptionFunction.getCall(0).args;
 
   t.deepEqual(arg, {
     data,
-    topic
+    topic,
   });
 });
 
