@@ -1,16 +1,16 @@
 import React from 'react';
-import {
-  render
-} from 'react-dom';
+import {render} from 'react-dom';
 
 import waddup from '../src';
 
 console.group('subscription assignment');
 
 const subscribeToFoo = (isPublishedOnce = false) => {
-  const options = !isPublishedOnce ? undefined : {
-    maxPublishCount: 1
-  };
+  const options = !isPublishedOnce
+    ? undefined
+    : {
+      maxPublishCount: 1,
+    };
 
   return waddup.subscribe('foo', options, ({data, topic}) => {
     console.log('hello world');
@@ -28,7 +28,7 @@ console.log(waddup.getSubscriptions('foo'));
 
 waddup.publish('foo');
 waddup.publish('foo', {
-  foo: 'bar'
+  foo: 'bar',
 });
 
 console.groupEnd('subscription assignment');
@@ -46,7 +46,7 @@ console.group('subscribe with maxPublishCount only publishes once');
 subscribeToFoo(true);
 
 waddup.publish('foo');
-waddup.publish('foo', 'foo called when it shouldn\'t be');
+waddup.publish('foo', "foo called when it shouldn't be");
 
 console.log(waddup.getSubscriptions());
 
@@ -66,10 +66,10 @@ console.log(multipleIds);
 console.log(waddup.getSubscriptions());
 
 waddup.publish('foo', {
-  stuff: 'for foo'
+  stuff: 'for foo',
 });
 waddup.publish('bar', {
-  stuff: 'for bar'
+  stuff: 'for bar',
 });
 
 console.groupEnd('subscribe to multiple topics');
@@ -85,20 +85,12 @@ console.log(waddup.getSubscriptions());
 
 console.groupEnd('unsubscribe from topic assigned to multiple topics');
 
-const App = () => {
-  return (
-    <div>
-      App
-    </div>
-  );
-};
+const App = () => <div>App</div>;
 
 const div = document.createElement('div');
 
 div.id = 'app-container';
 
-render((
-  <App/>
-), div);
+render(<App />, div);
 
 document.body.appendChild(div);

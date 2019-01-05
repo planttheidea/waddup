@@ -1,11 +1,5 @@
 {
-  "globals": {
-    "process": true
-  },
+  "extends": ["rapid7/browser"],
   "parser": "babel-eslint",
-  "parserOptions": {
-    "ecmaVersion": 6,
-    "sourceType": "module"
-  },
-  "rules":{}
+  "rules": {}
 }

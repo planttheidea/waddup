@@ -1,10 +1,7 @@
 {
-  "plugins": [
-    "add-module-exports"
-  ],
   "presets": [
     [
-      "latest",
+      "env",
       {
         "loose": true
       }

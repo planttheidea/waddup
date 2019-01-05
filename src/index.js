@@ -1,9 +1,7 @@
 // external dependencies
-import isArray from 'lodash/isArray';
-import isFunction from 'lodash/isFunction';
-import isNumber from 'lodash/isNumber';
-import isPlainObject from 'lodash/isPlainObject';
-import noop from 'lodash/noop';
+const {isArray} = Array;
+
+const noop = () => {};
 
 let subscriptions = new Map(),
     ids = new Map(),
@@ -19,12 +17,10 @@ export const getSubscriptions = (...topics) => {
     return subscriptions;
   }
 
-  const retrievedTopics = topics.map((topic) => {
-    return {
-      subscribers: subscriptions.get(topic),
-      topic
-    };
-  });
+  const retrievedTopics = topics.map((topic) => ({
+    subscribers: subscriptions.get(topic),
+    topic,
+  }));
 
   return retrievedTopics.length === 1 ? retrievedTopics[0] : retrievedTopics;
 };
@@ -39,10 +35,7 @@ const performUnsubscribe = (id) => {
     return;
   }
 
-  const {
-    subscriber,
-    topic
-  } = ids.get(id);
+  const {subscriber, topic} = ids.get(id);
 
   if (!subscriptions.has(topic)) {
     return;
@@ -51,11 +44,8 @@ const performUnsubscribe = (id) => {
   const subscribers = subscriptions.get(topic);
   const indexOfSubscription = subscribers.indexOf(subscriber);
 
-  if (!!~indexOfSubscription) {
-    const updatedSubscriptions = [
-      ...subscribers.slice(0, indexOfSubscription),
-      ...subscribers.slice(indexOfSubscription + 1)
-    ];
+  if (~indexOfSubscription) {
+    const updatedSubscriptions = subscribers.filter((subscriberIgnored, index) => index !== indexOfSubscription);
 
     subscriptions.set(topic, updatedSubscriptions);
 
@@ -75,38 +65,33 @@ const performUnsubscribe = (id) => {
  * @param {number} [options.maxPublishCount]
  * @return {function(function, Object): number}
  */
-const performSubscribe = (topicFunction = noop, options) => {
-  return (topic) => {
-    const id = ++uid;
-    const subscribers = subscriptions.has(topic) ? subscriptions.get(topic) : [];
-    const subscriber = {
-      fn: (...args) => {
-        topicFunction(...args);
+const performSubscribe = (topicFunction = noop, options) => (topic) => {
+  const id = ++uid;
 
-        subscriber.publishCount++;
+  const subscribers = subscriptions.has(topic) ? subscriptions.get(topic) : [];
+  const subscriber = {
+    fn(...args) {
+      topicFunction(...args);
 
-        if (subscriber.publishCount >= subscriber.options.maxPublishCount) {
-          performUnsubscribe(id);
-        }
-      },
-      options,
-      publishCount: 0
-    };
+      subscriber.publishCount++;
 
-    ids.set(id, {
-      subscriber,
-      topic
-    });
-
-    subscriptions.set(topic, [
-      ...subscribers,
-      subscriber
-    ]);
-
-    return id;
+      if (subscriber.publishCount >= subscriber.options.maxPublishCount) {
+        performUnsubscribe(id);
+      }
+    },
+    options,
+    publishCount: 0,
   };
-};
 
+  ids.set(id, {
+    subscriber,
+    topic,
+  });
+
+  subscriptions.set(topic, [...subscribers, subscriber]);
+
+  return id;
+};
 
 /**
  * trigger call of all functions subscribed to topic, passing the data to it
@@ -119,13 +104,15 @@ export const publish = (topic, data) => {
     throw new Error('You must provide a topic to publish.');
   }
 
-  if (subscriptions.has(topic)) {
-    subscriptions.get(topic).forEach((subscription) => {
+  const subscribers = subscriptions.get(topic);
+
+  if (isArray(subscribers)) {
+    subscribers.forEach((subscription) =>
       subscription.fn({
         data,
-        topic
-      });
-    });
+        topic,
+      })
+    );
   }
 };
 
@@ -138,18 +125,15 @@ export const publish = (topic, data) => {
  * @returns {number|Array<number>}
  */
 export const subscribe = (topics, options = {}, fn = noop) => {
-  if (isFunction(options)) {
-    fn = options;
-    options = {};
-  } else if (!isPlainObject(options)) {
-    throw new TypeError('Options passed must be a plain object.');
+  const isOptionsFunction = typeof options === 'function';
+  const handler = isOptionsFunction ? options : fn;
+  const config = isOptionsFunction ? {} : options;
+
+  if (typeof handler === 'function' && config && config.constructor === Object) {
+    return isArray(topics) ? topics.map(performSubscribe(handler, config)) : performSubscribe(handler, config)(topics);
   }
 
-  if (isArray(topics)) {
-    return topics.map(performSubscribe(fn, options));
-  }
-
-  return performSubscribe(fn, options)(topics);
+  throw new TypeError('Options passed must be a plain object.');
 };
 
 /**
@@ -159,7 +143,7 @@ export const subscribe = (topics, options = {}, fn = noop) => {
  * @returns {Array<number>|number}
  */
 export const unsubscribe = (ids) => {
-  if (isNumber(ids)) {
+  if (typeof ids === 'number') {
     return performUnsubscribe(ids);
   }
 
@@ -174,5 +158,5 @@ export default {
   getSubscriptions,
   publish,
   subscribe,
-  unsubscribe
+  unsubscribe,
 };
